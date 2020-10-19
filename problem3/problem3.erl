@@ -14,80 +14,34 @@ main(N) ->
     P = largest_prime_factor(N),
     P.
 
-largest_prime_factor(M) ->
-    Prime_Factors = prime_factors_to_N(M), 
+largest_prime_factor(N) ->
+    Prime_Factors = prime_factors_of_N(N), 
     Prime_Factors.
 
-prime_factors_to_N(N) ->
-    Prime_Factors = [2],
-    Int_List = lists:seq(2, N),
-    Current_Prime = 2,
-    prime_factors_to_N(Prime_Factors,
-                       Int_List,
-                       [],
-                       N,
-                       Current_Prime).
+prime_factors_of_N(N) ->
+    Current_Divisor = 2,
+    Prime_Factors = [],
+    Current_Quotient = N,
+    prime_factors_of_N(Prime_Factors, Current_Divisor, Current_Quotient).
 
-% Base Case: All prime factors retrieved from Int_List in reverse order. 
-prime_factors_to_N(Prime_Factors,
-                   [],
-                   [],
-                   _N,
-                   _Current_Prime)
+% Base Case: If the Current_Quotient is 1, we are done, return the list of 
+% Prime Factors. 
+prime_factors_of_N(Prime_Factors, _Current_Divisor, 1) 
 ->
     Prime_Factors;
-
-% If the current integer is evenly divided by the current prime, remove it from the Int_List
-prime_factors_to_N(Prime_Factors,
-                   [Current_Int | Rest_Int],
-                   Temp_List,
-                   N,
-                   Current_Prime)
-when Current_Int rem Current_Prime == 0 ->
-    prime_factors_to_N(Prime_Factors,
-                       Rest_Int,
-                       Temp_List,
-                       N,
-                       Current_Prime);
-% If the current integer is not evenly divided by the current prime, move it to the temp list. 
-prime_factors_to_N(Prime_Factors,
-                   [Current_Int | Rest_Int],
-                   Temp_List,
-                   N,
-                   Current_Prime)
-when Current_Int rem Current_Prime /= 0 ->
-    prime_factors_to_N(Prime_Factors,
-                       Rest_Int,
-                       [Current_Int | Temp_List],
-                       N,
-                       Current_Prime);
-% When we have exhausted the int_list, check if the first value of the new list (i.e. the list with multiples of Current Prime removed) evenly divides N. If not, it is not a prime factor of N, else it is. 
-prime_factors_to_N(Prime_Factors,
-                   [],
-                   Temp_List,
-                   N,
-                   _Current_Prime)
-->
-    New_Prime = lists:last(Temp_List),
-    New_List = lists:droplast(Temp_List),
-    if
-        % New_Prime is a prime factor of N
-        N rem New_Prime == 0 -> 
-            prime_factors_to_N([New_Prime | Prime_Factors],
-                                lists:reverse(New_List),
-                                [],
-                                N,
-                                New_Prime);
-        % New_Prime is not a factor of N, so call this pattern of the function again. 
-        N rem New_Prime /= 0 ->
-            prime_factors_to_N(Prime_Factors,
-                               [],
-                               New_List,
-                               N,
-                               New_Prime)
-
-    end.
-
+% If the current divisor divides the current quotient, it is a prime factor
+prime_factors_of_N(Prime_Factors, Current_Divisor, Current_Quotient)
+    when Current_Quotient rem Current_Divisor == 0 ->
+        prime_factors_of_N([Current_Divisor | Prime_Factors],
+                           Current_Divisor,
+                           Current_Quotient div Current_Divisor);
+% If the current divisor does not divide the current quotient, increment 
+% divisor by 1. 
+prime_factors_of_N(Prime_Factors, Current_Divisor, Current_Quotient)
+    when Current_Quotient rem Current_Divisor /= 0 ->
+        prime_factors_of_N(Prime_Factors,
+                           Current_Divisor + 1,
+                           Current_Quotient).
 
 
 
