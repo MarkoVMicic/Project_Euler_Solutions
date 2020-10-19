@@ -29,6 +29,17 @@ prime_factors_of_N(N) ->
 prime_factors_of_N(Prime_Factors, _Current_Divisor, 1) 
 ->
     Prime_Factors;
+prime_factors_of_N([], 2, Current_Quotient)
+->
+    if
+        Current_Quotient rem 2 == 0 ->
+            prime_factors_of_N([2], 2, Current_Quotient div 2);
+        Current_Quotient rem 2 /= 0 ->
+            prime_factors_of_N([], 3, Current_Quotient);
+        true ->
+            io:format("This shouldn't be seen! ~n")
+    end;
+
 % If the current divisor divides the current quotient, it is a prime factor
 prime_factors_of_N(Prime_Factors, Current_Divisor, Current_Quotient)
     when Current_Quotient rem Current_Divisor == 0 ->
@@ -40,10 +51,12 @@ prime_factors_of_N(Prime_Factors, Current_Divisor, Current_Quotient)
 prime_factors_of_N(Prime_Factors, Current_Divisor, Current_Quotient)
     when Current_Quotient rem Current_Divisor /= 0 ->
         prime_factors_of_N(Prime_Factors,
-                           Current_Divisor + 1,
+                           Current_Divisor + 2,
                            Current_Quotient).
 
 
+
+ 
 
 
 
