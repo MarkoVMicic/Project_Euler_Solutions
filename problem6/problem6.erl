@@ -81,7 +81,7 @@ fast_square_of_sum( N )
 % Suppose we wish to compute some function f(N) = ∑_{i=0}^N i^2. 
 % To do this, let us examine first the formula 
 %     g(N) = ∑_{i=0}^N i = (n(n+1))/2
-% Note that in both f and g, the sum begins from 0. This is useful as a first 
+% (Note that in both f and g, the sum begins from 0. This is useful as a first 
 % term of 0 will help us discover the formula for f).
 % We note here that g is a second degree polynomial. Since f deals with 
 % squaring the individual terms of g, we might start from thinking of f as 
