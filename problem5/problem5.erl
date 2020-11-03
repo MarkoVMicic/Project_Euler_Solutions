@@ -14,32 +14,35 @@
 
 % Naive solution: simply brute force through all numbers until you find a 
 % number that is evenly divisible by all integers [1, 2, ..., N].
-naive_main(N)
+naive_main( N )
 ->
-    naive_find_number_evenly_divisible_up_to_n(1, 1, N)
+    naive_find_number_evenly_divisible_up_to_n( 1, 1, N )
 .
 
 % See huge comment at the bottom of file for math explanation of how this fast 
 % version works. 
-fast_main(N)
+fast_main( N )
 ->
-    Primes = build_list_of_primes(N),
-    Limit = math:sqrt(N),
-    LogN = math:log(N),
-    fast_find_number_evenly_divisible_up_to_n(Primes, Limit, LogN, 1)
+    Primes = build_list_of_primes( N ),
+    Limit = math:sqrt( N ),
+    LogN = math:log( N ),
+    fast_find_number_evenly_divisible_up_to_n( Primes, Limit, LogN, 1 )
 .
 
 % Naive solution: Iterate through all divisors until N, and increment your 
 % number by 1 everytime you find something that isn't evenly divisible. 
-naive_find_number_evenly_divisible_up_to_n(N, Number, N) -> Number;
-naive_find_number_evenly_divisible_up_to_n(Factor, Number, N)
-when Number rem Factor == 0
+naive_find_number_evenly_divisible_up_to_n( N, Number, N ) -> Number;
+naive_find_number_evenly_divisible_up_to_n( Factor, 
+                                            Number, 
+                                            N ) when Number rem Factor == 0
 ->
-    naive_find_number_evenly_divisible_up_to_n(Factor+1, Number, N)
+    naive_find_number_evenly_divisible_up_to_n( Factor + 1, 
+                                                Number, 
+                                                N )
 ;
-naive_find_number_evenly_divisible_up_to_n(_Factor, Number, N)
+naive_find_number_evenly_divisible_up_to_n( _Factor, Number, N )
 ->
-    naive_find_number_evenly_divisible_up_to_n(1, Number+1, N)
+    naive_find_number_evenly_divisible_up_to_n( 1, Number+1, N )
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -85,35 +88,34 @@ naive_find_number_evenly_divisible_up_to_n(_Factor, Number, N)
 % Primes      [5,3,2]   ->  [5,3,2] ->  [7,5,3,2]
 % Number      [7]       ->  []      ->  []
 % Filtered    []        ->  [7]     ->  []
-build_list_of_primes(N) 
+build_list_of_primes( N ) 
 ->
-    build_list_of_primes([2], lists:seq(2, N), [])
+    build_list_of_primes( [2], lists:seq(2, N), [] )
 .
-build_list_of_primes(Primes, [], []) 
+build_list_of_primes( Primes, [], [] ) 
 -> 
-    lists:reverse(Primes)
+    lists:reverse( Primes )
 ; 
-build_list_of_primes(Primes, [], Numbers)
+build_list_of_primes( Primes, [], Numbers )
 ->
-    [Next_Prime | Rest] = lists:reverse(Numbers),
-    build_list_of_primes([Next_Prime | Primes], Rest, [])
+    [Next_Prime | Rest] = lists:reverse( Numbers ),
+    build_list_of_primes( [Next_Prime | Primes], Rest, [] )
 ;
-build_list_of_primes([Current_Prime | Primes], 
-                     [Current_Number | Numbers], 
-                     Filtered)
-when Current_Number rem Current_Prime == 0
+build_list_of_primes( [Current_Prime  | Primes], 
+                      [Current_Number | Numbers], 
+                      Filtered ) when Current_Number rem Current_Prime == 0
 ->
-    build_list_of_primes([Current_Prime | Primes],
-                         Numbers,
-                         Filtered)
+    build_list_of_primes( [Current_Prime | Primes],
+                          Numbers,
+                          Filtered )
 ;
-build_list_of_primes([Current_Prime | Primes], 
-                     [Current_Number | Numbers], 
-                     Filtered)
+build_list_of_primes( [Current_Prime  | Primes], 
+                      [Current_Number | Numbers], 
+                      Filtered )
 ->
-    build_list_of_primes([Current_Prime | Primes],
-                         Numbers,
-                         [Current_Number | Filtered])
+    build_list_of_primes( [Current_Prime  | Primes],
+                          Numbers,
+                          [Current_Number | Filtered] )
 .
 
 % Then for each prime in the list of primes, compute the appropriate exponent 
@@ -123,30 +125,29 @@ build_list_of_primes([Current_Prime | Primes],
 % Let LogN = log(N). 
 % If Prime <= Limit, then Number = Number * exp(Prime, floor(LogN/log(Prime)))
 % If Prime > Limit, then Number = Number * Prime. 
-fast_find_number_evenly_divisible_up_to_n([], _, _, Number) -> Number;
-fast_find_number_evenly_divisible_up_to_n([Current_Prime | Rest],
-                                          Limit,
-                                          LogN,
-                                          Number)
-when Current_Prime =< Limit
+fast_find_number_evenly_divisible_up_to_n( [], _, _, Number ) -> Number;
+fast_find_number_evenly_divisible_up_to_n( [Current_Prime | Rest],
+                                           Limit,
+                                           LogN,
+                                           Number ) when Current_Prime =< Limit
 ->
     % Trunc is used as an integer floor function. 
-    Exponent = trunc(LogN / math:log(Current_Prime)),
-    New_Number = Number * exp(Current_Prime, Exponent),
-    fast_find_number_evenly_divisible_up_to_n(Rest,
-                                              Limit,
-                                              LogN,
-                                              New_Number)
+    Exponent = trunc( LogN / math:log(Current_Prime) ),
+    New_Number = Number * exp( Current_Prime, Exponent ),
+    fast_find_number_evenly_divisible_up_to_n( Rest,
+                                               Limit,
+                                               LogN,
+                                               New_Number )
 ;
-fast_find_number_evenly_divisible_up_to_n([Current_Prime | Rest],
-                                          Limit,
-                                          LogN,
-                                          Number)
+fast_find_number_evenly_divisible_up_to_n( [Current_Prime | Rest],
+                                           Limit,
+                                           LogN,
+                                           Number )
 ->
-    fast_find_number_evenly_divisible_up_to_n(Rest,
-                                              Limit,
-                                              LogN,
-                                              Number*Current_Prime)
+    fast_find_number_evenly_divisible_up_to_n( Rest,
+                                               Limit,
+                                               LogN,
+                                               Number*Current_Prime )
 .
 
 % Square-multiply algorithm for fast exponentiation. As an added benefit, it 
