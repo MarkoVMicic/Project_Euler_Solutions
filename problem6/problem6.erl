@@ -39,7 +39,7 @@ fast_main( N )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 naive_sum_of_squares( N ) -> naive_sum_of_squares( lists:seq(1, N), 0 ).
-naive_sum_of_squares( [H|L], Acc)
+naive_sum_of_squares( [H|L], Acc )
 ->
     naive_sum_of_squares( L, Acc + (H*H) ) 
 ;
@@ -67,12 +67,12 @@ naive_square_of_sum( [], Acc )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % See bottom of file for explanation. 
-fast_sum_of_squares( N ) -> (N*(2*N+1)*(N+1)) div 6.
+fast_sum_of_squares( N ) -> ( N * ( 2*N + 1 ) * ( N+1 ) ) div 6.
 
 % uses famous formula ∑_{i=1}^n i = (n*(n+1))/2
 fast_square_of_sum( N ) 
 ->
-    Sum = (N*(N+1)) div 2,
+    Sum = ( N * ( N+1 ) ) div 2,
     Sum*Sum
 .
 
