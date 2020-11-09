@@ -19,7 +19,7 @@ main( N )
 % Sieve of Eratosthenes
 build_list_of_primes( N ) 
 ->
-    build_list_of_primes( [2], lists:seq(2, N), [] )
+    build_list_of_primes( [2], [2] ++ lists:seq(3, N, 2), [] )
 .
 build_list_of_primes( Primes, [], [] ) 
 -> 
