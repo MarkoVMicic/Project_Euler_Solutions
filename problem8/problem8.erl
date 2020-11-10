@@ -55,7 +55,6 @@ find_largest_product( [Number | Rest],
                       Acc,
                       Prod ) when length(Prod_List) < N
 ->
-    io:fwrite("FILL: List: ~p, prod_List: ~p~n", [Rest, [Number | Prod_List]]),
     find_largest_product( Rest, 
                           [Number | Prod_List], 
                           N, 
@@ -112,7 +111,6 @@ find_largest_product( Number_List,
                       Acc,
                       Prod ) when Prod > Acc
 ->
-    io:fwrite("CHECK: Acc: ~p, Prod: ~p~n", [Acc, Prod]),
     find_largest_product( Number_List,
                           [],
                           N,
@@ -127,7 +125,6 @@ find_largest_product( Number_List,
                       Acc,
                       Prod )
 ->
-    io:fwrite("CHECK: Acc: ~p, Prod: ~p~n", [Acc, Prod]),
     find_largest_product( Number_List,
                           [],
                           N,
