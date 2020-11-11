@@ -39,7 +39,8 @@
 % it every 2 digits to form the new list. 
 main( Numbers, N )
 ->
-    Numbers_Length = length(Numbers) div 2,
+    % div 2 for 2-digit numbers. 
+    Numbers_Length  = length(Numbers) div 2,
     Square_Length   = trunc(math:sqrt(Numbers_Length)),
 
     % Check that the supplied number can indeed be formed into a grid. 
@@ -52,10 +53,15 @@ main( Numbers, N )
             Rows = Grid,
             Columns = build_columns( Grid ),
             % Up as in going up from left to right. 
-            Up_Diag = build_up_diagonals( Grid, Square_Length )
-            % Row_Product = find_largest_product( Rows, N ),
-            % Column_Product = find_largest_product( Columns, N ),
-            % {Row_Product, Column_Product}
+            Up_Diag = build_up_diagonals( Grid, Square_Length ),
+            % Down as in going down from left to right.
+            Down_Diag = build_down_diagonals( Grid, Square_Length ),
+
+            Row_Product       = find_largest_product( Rows, N ),
+            Column_Product    = find_largest_product( Columns, N ),
+            Up_Diag_Product   = find_largest_product( Up_Diag, N ),
+            Down_Diag_Product = find_largest_product( Down_Diag, N ),
+            lists:max([Row_Product, Column_Product, Up_Diag_Product, Down_Diag_Product])
         ;
 
         false 
@@ -136,20 +142,84 @@ build_columns( [[]|_],
 
 build_up_diagonals( Grid, Square_Length ) 
 -> 
-    build_up_diagonals( Grid, (2*Square_Length - 1), 1, 1, [], [], [] )
+    Flat_Grid     = flatten_grid( Grid ),
+    Map           = create_grid_map( Flat_Grid, 1, #{} ),
+    Diagonal_List = diagonal_indices( Square_Length ),
+    make_diagonals( Diagonal_List, Map, [[]] )
 .
-build_up_diagonals( [[Number | Row] | Rest], 
-                    Num_Rows, 
-                    X, 
-                    Y, 
-                    Temp_Grid, 
-                    Diagonal, 
-                    Diagonal_List )
+
+build_down_diagonals( Grid, Square_Length )
 ->
-
+    Reversed_Grid = reverse_rows( Grid ),
+    build_up_diagonals( Reversed_Grid, Square_Length )
 .
 
+reverse_rows( Grid ) -> reverse_rows( Grid, [], [] ).
+reverse_rows( [[Number | Row] | Grid], Reverse_Row, Reverse_Grid )
+->
+    reverse_rows( [Row | Grid], [Number | Reverse_Row], Reverse_Grid )
+;
+reverse_rows( [[] | Grid], Reverse_Row, Reverse_Grid )
+->
+    reverse_rows( Grid, [], [Reverse_Row | Reverse_Grid] )
+;
+reverse_rows( [], [], Reverse_Grid )
+->
+    lists:reverse( Reverse_Grid )
+.
 
+flatten_grid( Grid ) -> flatten_grid( Grid, [] ).
+flatten_grid( [[Number | []] | Grid], Flat_Grid )
+->
+    flatten_grid( Grid, [Number | Flat_Grid] )
+;
+flatten_grid( [[Number | Row] | Grid], Flat_Grid )
+->
+    flatten_grid( [Row | Grid], [Number | Flat_Grid] )
+;
+flatten_grid( [], Flat_Grid )
+->
+    lists:reverse( Flat_Grid )
+.
+
+create_grid_map( [E|L], I, M ) -> create_grid_map( L, I+1, M#{I => E} );
+create_grid_map( [], _I, M )   -> M.
+
+diagonal_indices( N ) when N > 1 
+-> 
+    left( 1, N-1, [] ) ++ [mid( N, N-1, N-1, [] )] ++ right( N, 2, N-1, N-1, [] )
+;
+diagonal_indices( 1 )            
+-> 
+    [ [1] ]
+;
+diagonal_indices( _ )            
+-> 
+    throw( badrg )
+.    
+
+mid( N, _, 0, Out )      -> [N|Out];
+mid( N, Offset, C, Out ) -> mid( N, Offset, C-1, [N+C*Offset|Out] ).
+ 
+left( I, Offset, Out ) when I =< Offset     -> left( I+1, Offset, [do_class(I, I, Offset, [])|Out] );
+left( _, _, Out )                           -> lists:reverse( Out ).
+
+right( _N, _M, 0, _Offset, Out ) -> lists:reverse( Out );
+right( N, M, ECnt, Offset, Out ) -> right( N, M+1, ECnt-1, Offset, [do_class(N*M, ECnt, Offset, [])|Out] ).
+
+
+do_class( _, 0, _Off, Out ) -> lists:reverse( Out );
+do_class( I, C, Off, Out )  -> do_class( I+Off, C-1, Off, [I|Out] ).
+
+make_diagonals( [[I|IL]|L], MAP, [Cls|Out] )
+->
+    case MAP of
+        #{I := V} -> make_diagonals( [IL|L], MAP, [[V|Cls]|Out] );
+        _         -> make_diagonals( [IL|L], MAP, [Cls|Out] )
+    end
+;
+make_diagonals( [[]|L], MAP, [Cls|Out] ) -> make_diagonals( L, MAP, [[], lists:reverse(Cls)|Out] ); 
+make_diagonals( [], _, [[]|Out] )        -> lists:reverse( Out ).
 
 find_largest_product( Lists, N ) -> find_largest_product( Lists, N, 0 ).
 find_largest_product( [List|Rest], N, Acc )
