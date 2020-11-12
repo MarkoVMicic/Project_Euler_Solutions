@@ -47,21 +47,19 @@ main( Numbers, N )
     case Square_Length*Square_Length == Numbers_Length of
         true 
         ->
-            DD_Numbers = double_digit_list( Numbers ),
-            Grid = build_grid( DD_Numbers, Square_Length ),
-            % Grid already expressed in Rows
-            Rows = Grid,
-            Columns = build_columns( Grid ),
+            Grid = double_digit_list( Numbers ),
+            Rows = build_rows( Grid, Square_Length ),
+            Cols = build_columns( Rows ),
             % Up as in going up from left to right. 
-            Up_Diag = build_up_diagonals( Grid, Square_Length ),
+            U_Diag = build_diagonals( Rows, Square_Length ),
             % Down as in going down from left to right.
-            Down_Diag = build_down_diagonals( Grid, Square_Length ),
+            D_Diag = build_diagonals( reverse_rows(Rows), Square_Length ),
 
-            Row_Product       = find_largest_product( Rows, N ),
-            Column_Product    = find_largest_product( Columns, N ),
-            Up_Diag_Product   = find_largest_product( Up_Diag, N ),
-            Down_Diag_Product = find_largest_product( Down_Diag, N ),
-            lists:max([Row_Product, Column_Product, Up_Diag_Product, Down_Diag_Product])
+            Row_Product    = find_largest_product( Rows, N ),
+            Col_Product    = find_largest_product( Cols, N ),
+            U_Diag_Product = find_largest_product( U_Diag, N ),
+            D_Diag_Product = find_largest_product( D_Diag, N ),
+            lists:max([Row_Product, Col_Product, U_Diag_Product, D_Diag_Product])
         ;
 
         false 
@@ -72,6 +70,9 @@ main( Numbers, N )
 
 .
 
+% --------------------------------------------
+% Convert string into list of 2-digit numbers. 
+% --------------------------------------------
 double_digit_list( Numbers ) -> double_digit_list( Numbers, [] ).
 double_digit_list( [First, Second | Rest], New_List )
 ->
@@ -79,28 +80,32 @@ double_digit_list( [First, Second | Rest], New_List )
 ;
 double_digit_list( [], New_List ) -> lists:reverse(New_List). 
 
-build_grid( List, Side_Length ) -> build_grid( List, Side_Length, [], [] ).
-build_grid( List, 
+
+% --------------------------------------------------------------
+% Convert list of 2-digit numbers into list of rows aka 2D-array 
+% --------------------------------------------------------------
+build_rows( List, Side_Length ) -> build_rows( List, Side_Length, [], [] ).
+build_rows( List, 
             Side_Length, 
             Row, 
             Grid ) when length(Row) >= Side_Length
 ->
-    build_grid( List, 
+    build_rows( List, 
                 Side_Length, 
                 [], 
                 [lists:reverse(Row) | Grid] )
 ;
-build_grid( [Number | Rest],
+build_rows( [Number | Rest],
             Side_Length,
             Row,
             Grid )
 ->
-    build_grid( Rest,
+    build_rows( Rest,
                 Side_Length,
                 [Number | Row],
                 Grid )
 ;
-build_grid( [],
+build_rows( [],
             _Side_Length,
             [],
             Grid )
@@ -108,9 +113,14 @@ build_grid( [],
     lists:reverse(Grid)
 .
 
-build_columns( Grid ) 
+% ---------------------------------------------------------
+% Convert list of rows into list of columns aka transposing 
+% ---------------------------------------------------------
+% Note: Using rows as input is easier than passing the flat-list of 2-digit 
+%       numbers
+build_columns( Rows ) 
 -> 
-    build_columns( Grid, [], [], [])
+    build_columns( Rows, [], [], [])
 .
 build_columns( [ [Number | Row] | Rest ], 
                Temp_Grid,
@@ -139,55 +149,125 @@ build_columns( [[]|_],
 ->
     lists:reverse( Column_List )
 .
-
-build_up_diagonals( Grid, Square_Length ) 
+% -------------------------------------------------------
+% Convert list of rows numbers into list of up-diagonals 
+% -------------------------------------------------------
+%
+% Named "up-diagonals" because from left-to-right the numbers move down-to-up.
+%
+% Example: Square_Length = 6
+%
+%  [01  02  03  04  05  06]       [01]
+%  [07  08  09  10  11  12]       [02 07]
+%  [13  14  15  16  17  18]   ->  [03 08 13]
+%  [19  20  21  22  23  24]       [04 09 14 19]
+%  [25  26  27  28  29  30]       [05 10 15 20 25]
+%  [31  32  33  34  35  36]       [06 11 16 21 16 31]
+%                                 [12 17 22 27 32]
+%                                 [18 23 28 33]
+%                                 [24 29 34]
+%                                 [30 35]
+%                                 [36]
+%
+% To build "down-diagonals" (which are what people usually think of when they 
+% think of diagonals) simply pass in reversed rows!
+% 
+% Example: Square_Length = 6
+%
+%  [06  05  04  03  02  01]       [06]
+%  [12  11  10  09  08  07]       [05 12]
+%  [18  17  16  15  14  13]   ->  [04 11 18]
+%  [24  23  22  21  20  19]       [03 10 17 24]
+%  [30  29  28  27  26  25]       [02 09 16 23 30]
+%  [36  35  34  33  32  31]       [01 08 15 22 29 36]
+%                                 [07 14 21 18 35]
+%                                 [13 20 27 34]
+%                                 [19 26 33]
+%                                 [25 32]
+%                                 [31]
+build_diagonals( Rows, Square_Length ) 
 -> 
-    Flat_Grid     = flatten_grid( Grid ),
+    Flat_Grid     = flatten_rows( Rows ),
     Map           = create_grid_map( Flat_Grid, 1, #{} ),
     Diagonal_List = diagonal_indices( Square_Length ),
     make_diagonals( Diagonal_List, Map, [[]] )
 .
 
-build_down_diagonals( Grid, Square_Length )
+% Need to use this because lists:flatten flattens the string elements into one 
+% long string! 
+flatten_rows( Rows ) -> flatten_rows( Rows, [] ).
+flatten_rows( [[Number | []] | Rows], Flat_Grid )
 ->
-    Reversed_Grid = reverse_rows( Grid ),
-    build_up_diagonals( Reversed_Grid, Square_Length )
-.
-
-reverse_rows( Grid ) -> reverse_rows( Grid, [], [] ).
-reverse_rows( [[Number | Row] | Grid], Reverse_Row, Reverse_Grid )
-->
-    reverse_rows( [Row | Grid], [Number | Reverse_Row], Reverse_Grid )
+    flatten_rows( Rows, [Number | Flat_Grid] )
 ;
-reverse_rows( [[] | Grid], Reverse_Row, Reverse_Grid )
+flatten_rows( [[Number | Row] | Rows], Flat_Grid )
 ->
-    reverse_rows( Grid, [], [Reverse_Row | Reverse_Grid] )
+    flatten_rows( [Row | Rows], [Number | Flat_Grid] )
 ;
-reverse_rows( [], [], Reverse_Grid )
-->
-    lists:reverse( Reverse_Grid )
-.
-
-flatten_grid( Grid ) -> flatten_grid( Grid, [] ).
-flatten_grid( [[Number | []] | Grid], Flat_Grid )
-->
-    flatten_grid( Grid, [Number | Flat_Grid] )
-;
-flatten_grid( [[Number | Row] | Grid], Flat_Grid )
-->
-    flatten_grid( [Row | Grid], [Number | Flat_Grid] )
-;
-flatten_grid( [], Flat_Grid )
+flatten_rows( [], Flat_Grid )
 ->
     lists:reverse( Flat_Grid )
 .
 
-create_grid_map( [E|L], I, M ) -> create_grid_map( L, I+1, M#{I => E} );
-create_grid_map( [], _I, M )   -> M.
-
-diagonal_indices( N ) when N > 1 
+% ---------------------------------------------------
+% Use erlang map to index the grid elements. 
+% ---------------------------------------------------
+% 
+% Example: Square_Length = 3
+% As rows, we have
+% [a, b, c]
+% [d, e, f]
+% [g, h, i]
+%
+% Which we have flattened into the list [a, b, c, d, e, f, g, h, i]
+% and we then create the map
+% #{ 1 => a,
+%    2 => b,
+%    3 => c,
+%    4 => d,
+%    5 => e,
+%    6 => f,
+%    7 => g,
+%    8 => h,
+%    9 => i,
+% }
+create_grid_map( [Element | List], Index, Map ) 
 -> 
-    left( 1, N-1, [] ) ++ [mid( N, N-1, N-1, [] )] ++ right( N, 2, N-1, N-1, [] )
+    create_grid_map( List, Index+1, Map#{Index => Element } )
+;
+create_grid_map( [], _Index, Map )   -> Map.
+
+% -------------
+% GRID Indexing
+% -------------
+% 
+% Example: Square_Length = 6, Offset = 5
+%
+%  01  02  03  04  05  06  
+%  07  08  09  10  11  12
+%  13  14  15  16  17  18
+%  19  20  21  22  23  24
+%  25  26  27  28  29  30
+%  31  32  33  34  35  36
+%
+%
+%  01 --------------------+
+%  02, 07                 |
+%  03, 08, 13             |---> left
+%  04, 09, 14, 19,        |
+%  05, 10, 15, 20, 25 ----+
+%  06, 11, 16, 21, 26, 31  ---> mid 
+%  12, 17, 22, 27, 32 ----+
+%  18, 23, 28, 33         |
+%  24, 29, 34             |---> right
+%  30, 35                 |
+%  36 --------------------+
+diagonal_indices( Square_Length ) when Square_Length > 1 
+-> 
+    L = left( 1, Square_Length-1, [] ),
+    M = mid( Square_Length, Square_Length-1, Square_Length-1, [] ),
+    R = right( Square_Length, 2, Square_Length-1, Square_Length-1, [] ),
+    L ++ M ++ R
 ;
 diagonal_indices( 1 )            
 -> 
@@ -198,7 +278,7 @@ diagonal_indices( _ )
     throw( badrg )
 .    
 
-mid( N, _, 0, Out )      -> [N|Out];
+mid( N, _, 0, Out )      -> [[N|Out]];
 mid( N, Offset, C, Out ) -> mid( N, Offset, C-1, [N+C*Offset|Out] ).
  
 left( I, Offset, Out ) when I =< Offset     -> left( I+1, Offset, [do_class(I, I, Offset, [])|Out] );
@@ -211,6 +291,9 @@ right( N, M, ECnt, Offset, Out ) -> right( N, M+1, ECnt-1, Offset, [do_class(N*M
 do_class( _, 0, _Off, Out ) -> lists:reverse( Out );
 do_class( I, C, Off, Out )  -> do_class( I+Off, C-1, Off, [I|Out] ).
 
+% ----------------------------------------------------------------------------
+% Use the diagonal indices and the grid-map to assemble the list of diagonals. 
+% ----------------------------------------------------------------------------
 make_diagonals( [[I|IL]|L], MAP, [Cls|Out] )
 ->
     case MAP of
@@ -218,9 +301,34 @@ make_diagonals( [[I|IL]|L], MAP, [Cls|Out] )
         _         -> make_diagonals( [IL|L], MAP, [Cls|Out] )
     end
 ;
-make_diagonals( [[]|L], MAP, [Cls|Out] ) -> make_diagonals( L, MAP, [[], lists:reverse(Cls)|Out] ); 
+make_diagonals( [[]|L], MAP, [Cls|Out] ) 
+-> 
+    make_diagonals( L, MAP, [[], lists:reverse(Cls)|Out] )
+; 
 make_diagonals( [], _, [[]|Out] )        -> lists:reverse( Out ).
 
+
+% -------------------------------------
+% For a list of Rows, reverse each row. 
+% -------------------------------------
+reverse_rows( Rows ) -> reverse_rows( Rows, [], [] ).
+reverse_rows( [[Number | Row] | Rows], Reverse_Row, Reverse_Grid )
+->
+    reverse_rows( [Row | Rows], [Number | Reverse_Row], Reverse_Grid )
+;
+reverse_rows( [[] | Rows], Reverse_Row, Reverse_Grid )
+->
+    reverse_rows( Rows, [], [Reverse_Row | Reverse_Grid] )
+;
+reverse_rows( [], [], Reverse_Grid )
+->
+    lists:reverse( Reverse_Grid )
+.
+
+
+% Iterate through list of lists, and for each list find the largest product of 
+% N adjacent elements. For each List in the list of lists, this function 
+% returns 0 if N > length(List)
 find_largest_product( Lists, N ) -> find_largest_product( Lists, N, 0 ).
 find_largest_product( [List|Rest], N, Acc )
 ->
