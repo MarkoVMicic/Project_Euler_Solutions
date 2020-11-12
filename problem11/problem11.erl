@@ -35,7 +35,18 @@
 -module(problem11).
 -export([main/2]).
 
-% -import([rows, cols, diag, prod]).
+% Below I loosely use the term array although techinically I should use *list*.
+
+% modules used:
+% rows: for assembling rows using a vector aka a 1D array. 
+% cols: for assembling columns using rows (essentially matrix transposition)
+% diag: for assembling diagonals given rows*
+% prod: for finding the largest product of N adjacent elements in each list
+
+% *: a footnote: diag:build_diagonals/2 expects rows (a matrix aka 2D-array) 
+% as input but immediately flattens it into a vector (aka 1D array). It works 
+% this way because it's convenient to pass reversed rows in order to construct 
+% so-called "down-diagonals"
 
 % Key assumption: pass in one long string as the Numbers argument, and parse 
 % it every 2 digits to form the new list. 
@@ -55,13 +66,14 @@ main( Numbers, N )
             % Up as in going up from left to right. 
             U_Diag = diag:build_diagonals( Rows, Square_Length ),
             % Down as in going down from left to right.
-            D_Diag = diag:build_diagonals( rows:reverse_rows(Rows), Square_Length ),
+            D_Diag = diag:build_diagonals( rows:reverse_rows(Rows), 
+                                           Square_Length ),
 
             Row_Product    = prod:find_largest_product( Rows, N ),
             Col_Product    = prod:find_largest_product( Cols, N ),
-            U_Diag_Product = prod:find_largest_product( U_Diag, N ),
-            D_Diag_Product = prod:find_largest_product( D_Diag, N ),
-            lists:max([Row_Product, Col_Product, U_Diag_Product, D_Diag_Product])
+            UD_Product = prod:find_largest_product( U_Diag, N ),
+            DD_Product = prod:find_largest_product( D_Diag, N ),
+            lists:max([Row_Product, Col_Product, UD_Product, DD_Product])
         ;
 
         false 
