@@ -69,10 +69,10 @@ main( Numbers, N )
             D_Diag = diag:build_diagonals( rows:reverse_rows(Rows), 
                                            Square_Length ),
 
-            Row_Product    = prod:find_largest_product( Rows, N ),
-            Col_Product    = prod:find_largest_product( Cols, N ),
-            UD_Product = prod:find_largest_product( U_Diag, N ),
-            DD_Product = prod:find_largest_product( D_Diag, N ),
+            Row_Product  = prod:find_largest_product( Rows, N ),
+            Col_Product  = prod:find_largest_product( Cols, N ),
+            UD_Product   = prod:find_largest_product( U_Diag, N ),
+            DD_Product   = prod:find_largest_product( D_Diag, N ),
             lists:max([Row_Product, Col_Product, UD_Product, DD_Product])
         ;
 
