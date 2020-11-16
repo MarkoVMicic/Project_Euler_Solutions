@@ -24,24 +24,161 @@
 % divisors?
 
 -module(problem12).
--export([main/1, find_num_factors/1]).
+-export([naive_main/1, fast_main/1, build_list_of_primes/1, phi/2]).
 
-main( N )
+naive_main( N )
 ->
     triangle_number_with_N_factors( N )
 .
 
+
+% See bottom comment for mathematical explanation of fast_main/1.
+fast_main( N )
+->
+
+    % A list of approximately 1000 primes is enough to compute 500 
+    % divisor-triangle number. With some experimentation, it seems like N*2 
+    % prime-list is long enough to deal with the cases I tried **Need to 
+    % mathematically check this out**
+    P = N*2,
+    % Prime Number Theorem: [# primes to N] ~= N/logN 
+    % Magic number of 1.3 as a scaling factor arrived at with experimentation. 
+    Primes_List = build_list_of_primes( trunc(math:ceil(1.3*P*math:log(P))) ),
+    triangle_number_divisors( 1, N, Primes_List )
+.
+
+% -------------
+% Fast Approach
+% -------------
+
+% ---------------------
+% Sieve of Eratosthenes
+% ---------------------
+build_list_of_primes( N ) 
+->
+    build_list_of_primes( [2], lists:seq(2, N), [] )
+.
+build_list_of_primes( Primes, [], [] ) 
+-> 
+    % Uncomment this line for primes in ascending order. 
+    lists:reverse( Primes )
+
+    % Uncomment this line for primes in descending order.
+    % Primes
+; 
+build_list_of_primes( Primes, [], Numbers )
+->
+    [Next_Prime | Rest] = lists:reverse( Numbers ),
+    build_list_of_primes( [Next_Prime | Primes], Rest, [] )
+;
+build_list_of_primes( [Current_Prime  | Primes], 
+                      [Current_Number | Numbers], 
+                      Filtered ) when Current_Number rem Current_Prime == 0
+->
+    build_list_of_primes( [Current_Prime | Primes],
+                          Numbers,
+                          Filtered )
+;
+build_list_of_primes( [Current_Prime  | Primes], 
+                      [Current_Number | Numbers], 
+                      Filtered )
+->
+    build_list_of_primes( [Current_Prime  | Primes],
+                          Numbers,
+                          [Current_Number | Filtered] )
+.
+
+% --------------------------------------
+% Find triangle number with divisors > N
+% --------------------------------------
+triangle_number_divisors( I, N, Primes_List ) 
+->
+    triangle_number_divisors( I, N, Primes_List, 1, 0 )
+.
+triangle_number_divisors( _I, 
+                          N, 
+                          _Primes_List, 
+                          Triangle_Number, 
+                          Num_Divisors ) when Num_Divisors > N
+->
+    Triangle_Number
+;
+triangle_number_divisors( I, 
+                          N, 
+                          Primes_List, 
+                          _Triangle_Number, 
+                          _Num_Divisors )
+->
+    New_Triangle_Number = (I * (I+1)) div 2,
+    case I rem 2 of
+        0 -> 
+          Divisors = phi(I div 2, Primes_List) * phi(I+1, Primes_List);
+        _ -> 
+          Divisors = phi(I, Primes_List) * phi((I + 1) div 2, Primes_List)
+    end,
+    triangle_number_divisors( I+1, 
+                              N, 
+                              Primes_List, 
+                              New_Triangle_Number, 
+                              Divisors)
+.
+
+% ---------------------------
+% Number of Divisors Function
+% ---------------------------
+phi( N, Primes ) -> phi( N, Primes, 1 ).
+phi( N, [Prime | Primes], Num_Divisors ) when N rem Prime == 0
+->
+
+    Prime_Exponent = compute_prime_factor_exponent( N, Prime ),
+    phi( N, Primes, Num_Divisors*(Prime_Exponent+1) )
+;
+phi( N, [_Prime | Primes], Num_Divisors )
+->
+    phi(N, Primes, Num_Divisors )            
+;   
+phi( _N, [], Num_Divisors )
+->
+    Num_Divisors
+.
+
+compute_prime_factor_exponent( N, Prime ) 
+-> 
+    compute_prime_factor_exponent( N, Prime, 0 )
+.
+compute_prime_factor_exponent( 1, _Prime, Exponent ) 
+-> 
+    Exponent
+;
+compute_prime_factor_exponent( N, Prime, Exponent ) when N rem Prime == 0
+->
+    compute_prime_factor_exponent( N div Prime, Prime, Exponent + 1 )
+;
+compute_prime_factor_exponent( _N, _Prime, Exponent) 
+-> 
+    Exponent
+.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ----------------
+% Naive Approach
+% ----------------
+
+% --------------------------------------
+% Find triangle number with divisors > N
+% --------------------------------------
 triangle_number_with_N_factors( N )
 ->
     triangle_number_with_N_factors( N, 1, 1, 0)
 .
 triangle_number_with_N_factors( N,
-                                Index,
+                                _Index,
                                 Triangle_Number,
                                 Factors ) when Factors > N
 ->
-    % There's a bug somewhere that's returning the next triangle number rather 
-    % than the one we want. Fix this. 
     Triangle_Number
 ;
 triangle_number_with_N_factors( N,
@@ -67,6 +204,9 @@ triangle_number_with_N_factors( N,
                                     0)
 .
 
+% ----------------------------
+% Find number of factors of N
+% ----------------------------
 find_num_factors( 1 )      -> 1;
 find_num_factors( 2 )      -> 2;
 find_num_factors( 3 )      -> 2;
@@ -95,3 +235,43 @@ find_num_factors( Number, Factor, Factors, Min_Factor)
 ->
     find_num_factors( Number, Factor+1, Factors, Min_Factor )
 .
+
+
+% ------------------------
+% Fast Method Explanation
+% ------------------------
+
+% By the fundmamental theorem of arithmetic, we know that any integer N can be 
+% expressed as the unique product of primes:
+%     N = P1^A1 * P2^A2 * ... * Pk^Ak
+% Using this fact, we can also compute the number of divisors the integer N 
+% has, which we can call Phi here:
+%     Phi(N) = (A1 + 1)(A2+1)...(Ak+1)
+% To show this is true, consider some M = P^A, where P is prime. Then the list 
+% of divisors of M is
+%     Div_List(M) = [1, P, P^2, P^3, ..., P^A]
+% so clearly
+%     |Div_List(M)| = Phi(M) = A+1.
+% Now suppose that M = P^A Q^B where P,Q are prime. Then, we can write out a 
+% table of the divisors:
+%     Div_List(M) = 1,   P,     P^2,     ..., P^A, 
+%                   Q,   P*Q,   P^2*Q,   ..., P^A*Q
+%                   Q^2, P*Q^2  P^2*Q^2, ..., P^A*Q^2
+%                   ..., 
+%                   Q^B, P*Q^B, P^2*Q^B, ..., P^A*Q^B
+% Which is clearly a (A+1) x (B+1) matrix. Similarly, we can easily see that 
+% this generalizes, so that if
+%     N = P1^A1 * P2^A2 * ... * Pk^Ak
+% then
+%     Phi(N) = (A1 + 1)(A2+1)...(Ak+1).
+%
+% Now note that for triangular number T(N), T(N) = ∑_{I=1}^N I = (N(N+1))/2
+% Clearly, N, N+1 are necessarily co-prime. Thus we have
+%     if N is even:
+%       Phi(T(N)) = Phi(N/2) * Phi(N+1)
+%     else:
+%       Phi(T(N)) = Phi(N) * Phi((N+1)/2)
+%
+% So all we need is a list of prime numbers long enough that we can express 
+% all the triangle numbers we need
+
