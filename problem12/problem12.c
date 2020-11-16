@@ -14,6 +14,11 @@ long int find_num_factors(long int triangle_number)
         {
             num_factors += 2;
         }
+        if(i*i == triangle_number)
+        {   
+            // Accounts for perfect squares.
+            num_factors--;
+        }
     }
     return num_factors;
 }
