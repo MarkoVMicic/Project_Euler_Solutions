@@ -87,8 +87,8 @@ find_num_factors( Number,
                   Min_Factor ) when Number rem Factor == 0
 ->
     case Factor*Factor == Number of
-    true  -> find_num_factors( Number, Factor+1, Factors+1, Min_Factor );
-    false -> find_num_factors( Number, Factor+1, Factors+2, Min_Factor )
+      true  -> find_num_factors( Number, Factor+1, Factors+1, Min_Factor );
+      false -> find_num_factors( Number, Factor+1, Factors+2, Min_Factor )
   end
 ;
 find_num_factors( Number, Factor, Factors, Min_Factor)

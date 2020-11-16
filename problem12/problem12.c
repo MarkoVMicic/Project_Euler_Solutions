@@ -42,10 +42,6 @@ int main(int argc, char **argv)
         {
             break;
         }
-        if(i % 50 == 0)
-        {
-            printf("Processed %ld numbers; current triangle number is %ld\n", i, triangle_number);
-        }
         i++;
     }
     printf("Number is: %ld\n", triangle_number);
