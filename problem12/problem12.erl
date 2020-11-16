@@ -24,7 +24,7 @@
 % divisors?
 
 -module(problem12).
--export([main/1]).
+-export([main/1, find_num_factors/1]).
 
 main( N )
 ->
@@ -33,106 +33,63 @@ main( N )
 
 triangle_number_with_N_factors( N )
 ->
-    triangle_number_with_N_factors( N, 1, 1, 0, 0)
+    triangle_number_with_N_factors( N, 1, 1, 0)
 .
 triangle_number_with_N_factors( N,
                                 Index,
                                 Triangle_Number,
-                                _Factors,
-                                Acc ) when Acc > N
+                                Factors ) when Factors > N
 ->
     % There's a bug somewhere that's returning the next triangle number rather 
     % than the one we want. Fix this. 
-    Triangle_Number - Index
+    Triangle_Number
 ;
 triangle_number_with_N_factors( N,
                                 Index,
                                 Triangle_Number,
-                                Factors,
-                                Acc ) when Factors > Acc
+                                0 )
 ->
-    Next_Triangle_Number = Triangle_Number + Index+1,
-    io:fwrite("~p: Triangle Number: ~p #Factors: ~p~n", 
-              [Index, Next_Triangle_Number, Factors]),
-    triangle_number_with_N_factors( N, 
-                                    Index+1,
-                                    Next_Triangle_Number,
-                                    0,
+    Factors = find_num_factors( Triangle_Number ),
+    triangle_number_with_N_factors( N,
+                                    Index,
+                                    Triangle_Number,
                                     Factors )
 ;
 triangle_number_with_N_factors( N,
                                 Index,
                                 Triangle_Number,
-                                Factors,
-                                Acc ) when Factors =< Acc,
-                                           Factors > 0
+                                _Factors)
 ->
-
     Next_Triangle_Number = Triangle_Number + Index+1,
-    case Index rem 100 of
-        0 -> 
-            io:fwrite("~p: Triangle Number: ~p #Factors: ~p~n", 
-                      [Index, Next_Triangle_Number, Factors]);
-        _ -> noop
-    end,
     triangle_number_with_N_factors( N, 
                                     Index+1,
                                     Next_Triangle_Number,
-                                    0,
-                                    Acc )
-;
-triangle_number_with_N_factors( N,
-                                Index,
-                                Triangle_Number,
-                                0,
-                                Acc )
-->
-
-    Factors = find_num_factors( Triangle_Number ),
-    triangle_number_with_N_factors( N,
-                                    Index,
-                                    Triangle_Number,
-                                    Factors,
-                                    Acc )
+                                    0)
 .
 
 find_num_factors( 1 )      -> 1;
 find_num_factors( 2 )      -> 2;
-find_num_factors( Number ) -> find_num_factors( Number, 1, 1, 1 ).
-find_num_factors( Number, 
+find_num_factors( 3 )      -> 2;
+find_num_factors( 4 )      -> 2;
+find_num_factors( Number ) -> 
+  find_num_factors( Number, 2, 1, math:sqrt(Number) )
+.
+find_num_factors( _Number, 
                   Factor, 
                   Factors, 
-                  Min_Factor ) when Factor > (Number / Min_Factor)
+                  Min_Factor ) when Factor > Min_Factor
 ->
-    Factors + 1
+    Factors+1
 ;
-find_num_factors( Number,
-                  1,
-                  Factors,
-                  Min_Factor )
-->
-    find_num_factors( Number,
-                      2,
-                      Factors,
-                      Min_Factor)
-;
-find_num_factors( Number, 
-                  Factor, 
-                  1, 
-                  _Min_Factor ) when Number rem Factor == 0
-->
-    find_num_factors( Number,
-                  Factor+1,
-                  2,
-                  Factor )
-;
-
 find_num_factors( Number, 
                   Factor, 
                   Factors, 
                   Min_Factor ) when Number rem Factor == 0
 ->
-    find_num_factors( Number, Factor+1, Factors+1, Min_Factor )
+    case Factor*Factor == Number of
+    true  -> find_num_factors( Number, Factor+1, Factors+1, Min_Factor );
+    false -> find_num_factors( Number, Factor+1, Factors+2, Min_Factor )
+  end
 ;
 find_num_factors( Number, Factor, Factors, Min_Factor)
 ->
