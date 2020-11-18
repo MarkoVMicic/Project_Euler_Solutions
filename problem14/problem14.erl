@@ -62,7 +62,7 @@ longest_chain_up_to_N( N,
     longest_chain_up_to_N( N - 1,
                            Current_Initial + 1,
                            Current_Initial + 1,
-                           1,
+                           0,
                            Chain_Length,
                            Current_Initial )
 ;
@@ -77,7 +77,7 @@ longest_chain_up_to_N( N,
     longest_chain_up_to_N( N - 1,
                            Current_Initial + 1,
                            Current_Initial + 1,
-                           1,
+                           0,
                            Longest_Length,
                            Longest_Initial )
 ;
@@ -135,7 +135,7 @@ longest_chain_with_map( 0,
                        Longest_Initial,
                        _Map )
 ->
-    {Longest_Initial, Longest_Length+1}
+    {Longest_Initial, Longest_Length}
 ;
 longest_chain_with_map( N,
                         Current_Initial,
@@ -226,7 +226,7 @@ longest_chain_with_map( N,
         ->
             longest_chain_with_map( N,
                                     Current_Initial,
-                                    3*Current_Number +1,
+                                    3*Current_Number + 1,
                                     Chain_Length + 1,
                                     Longest_Length,
                                     Longest_Initial,
