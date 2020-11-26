@@ -37,13 +37,12 @@ count_letters( [Number | Rest], Map, String_List )
 count_letters( [], _Map, String_List )
 ->
     length( lists:flatten(String_List) )
-    % String_List
 .
 
 % ------------------------------------
 % Use Map to create string from number
 % ------------------------------------
-% If we arrive at 
+% If we arrive at any number less than 20, we have a direct value in the map
 create_numeral( Number, Map ) when Number =< 20
 ->
     case Map of
@@ -51,6 +50,7 @@ create_numeral( Number, Map ) when Number =< 20
         _                   -> throw(numerical_error)
     end
 ;
+% Process 10s not immediately found in map. 
 create_numeral( Number, Map ) when Number < 100,
                                    Number > 20
 ->
@@ -69,6 +69,7 @@ create_numeral( Number, Map ) when Number < 100,
     Number_String = [Ten_String] ++ [Unit_String],
     lists:flatten( Number_String )
 ;
+% Process 100s
 create_numeral( Number, Map ) when Number >= 100,
                                    Number < 1000
 ->
@@ -99,10 +100,10 @@ create_numeral( Number, Map ) when Number == 1000
         _                   -> throw(error)
     end
 .
+
 % -------------------------------------------------------
 % The Map of numbers to strings. 
 % -------------------------------------------------------
-
 create_numbers_map()
 ->
     #{ 0    =>  "",
@@ -135,4 +136,3 @@ create_numbers_map()
        90   =>  "ninety",
        1000 =>  "onethousand" }
 .
-
