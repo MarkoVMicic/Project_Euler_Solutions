@@ -35,7 +35,7 @@
 % and requires a clever method! ;o)
 
 -module( problem18 ).
--export( [main/1, add_adjacent_rows/2] ).
+-export( [main/1] ).
 
 main( Input_Path )
 -> 
