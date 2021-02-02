@@ -222,3 +222,92 @@ reverse_from_K_plus_1( List, KIndex )
     {Head_List, Tail_List} = lists:split( KIndex, List ),
     Head_List ++ lists:reverse( Tail_List )
 .
+
+
+
+
+% Below is a version taken from the internet which I do not understand. Uses 
+% some very complex recursion. 
+
+% main( Num_Digits)
+% ->
+%     List = lists:seq( 0, Num_Digits-1 ),
+%     Permuted_Lists = generate_permutations( List )
+%     % lists:nth( Which, Permuted_Lists )
+% .
+
+% generate_permutations( [] ) 
+% -> 
+%     io:fwrite("Entering generate_permutations( [] )~n"),
+%     Result = [[]],
+%     io:fwrite("Exiting generate_permutations( [] ), returning ~p~n", [Result]),
+%     Result
+% ;
+% generate_permutations( List )
+% ->
+%     io:fwrite("Entering generate_permutations( ~p )~n", [List]),
+
+%     Result = zipper( List, [], [] ),
+
+%     io:fwrite("Exiting generate_permutations( ~p ) returning ~p~n", [List, Result] ),
+
+%     Result
+% .
+
+% zipper( [], Rest, Permuted_Lists )
+% ->
+%     io:fwrite("Entering zipper( [], ~p, ~p )~n", [Rest, Permuted_Lists]),
+%     Result = lists:reverse( Permuted_Lists ),
+%     io:fwrite("Exiting zipper( [], ~p, ~p ) returning ~p~n", [Rest, Permuted_Lists, Result]),
+%     Result
+% ;
+% zipper( [ Head | Tail], 
+%         Rest, 
+%         Permuted_Lists )
+% ->
+%     io:fwrite("Entering zipper( [~p | ~p], ~p, ~p )~n", [Head, Tail, Rest, Permuted_Lists]),
+%     Reversed = lists:reverse( Rest, Tail ),
+%     Next = generate_permutations( Reversed  ),
+%     Result = prepend( Head, 
+%                       Next,
+%                       Tail,
+%                       [Head | Rest],
+%                       Permuted_Lists ),
+
+%     io:fwrite("Exiting zipper( [~p | ~p], ~p, ~p ) returning ~p~n", [Head, Tail, Rest, Permuted_Lists, Result]),
+
+%     Result
+% .
+
+% prepend( Prepend_X, 
+%          [],  
+%          Tail, 
+%          Rest, 
+%          Permuted_Lists )
+% ->
+%     io:fwrite("Entering prepend( ~p, [], ~p, ~p, ~p )~n", [Prepend_X, Tail, Rest, Permuted_Lists]),
+
+%     Result = zipper( Tail, Rest, Permuted_Lists ),
+
+%     io:fwrite("Exiting prepend( ~p, [], ~p, ~p, ~p ) returning ~p~n", [Prepend_X, Tail, Rest, Permuted_Lists, Result]),
+
+%     Result
+% ;
+% prepend( Prepend_X, 
+%          [Head | Tail], 
+%          Zipper_Tail, 
+%          Zipper_Head, 
+%          Permuted_Lists )
+% ->
+%     io:fwrite("Entering prepend( ~p, [~p | ~p], ~p, ~p, ~p )~n", [Prepend_X, Head, Tail, Zipper_Tail, Zipper_Head, Permuted_Lists]),
+
+%     Result = prepend( Prepend_X, 
+%                       Tail, 
+%                       Zipper_Tail, 
+%                       Zipper_Head, 
+%                       [[Prepend_X | Head] | Permuted_Lists] ),
+
+%     io:fwrite("Exiting prepend( ~p, [~p | ~p, ~p, ~p, ~p ) returning ~p~n", [Prepend_X, Head, Tail, Zipper_Tail, Zipper_Head, Permuted_Lists, Result]),
+
+%     Result
+% .
