@@ -17,279 +17,57 @@
 % formed in the same way?
 
 -module( problem28 ).
--export( [ main/1 ] ).
+-export( [ main/1] ).
 
 main( N )
 ->
-    case N rem 2 == 0 of
-        true
-        ->
-            Upper_Right = even_N_sum_upper_right_diagonal( N ),
-            Upper_Left  = even_N_sum_upper_left_diagonal( N ),
-            Lower_Left  = even_N_sum_lower_left_diagonal( N ),
-            Lower_Right = even_N_sum_lower_right_diagonal( N ),
-            Upper_Right + Upper_Left + Lower_Left + Lower_Right
-        ;
-        false
-        ->
-            Upper_Right = odd_N_sum_upper_right_diagonal( N ),
-            Upper_Left  = odd_N_sum_upper_left_diagonal( N ),
-            Lower_Left  = odd_N_sum_lower_left_diagonal( N ),
-            Lower_Right = odd_N_sum_lower_right_diagonal( N ),
-            % Add the central 1 at the end 
-            Upper_Right + Upper_Left + Lower_Left + Lower_Right + 1
-    end
+    sum_diagonals_of_spiral( N )
 .
 
-% --------------------
-% N is an even Number
-% --------------------
-% In an even-square (i.e. a square whose side N is an even number), the upper 
-% right diagonal consists of odd N^2 + 1 up to N .
-%
-% e.g. N = 6:
-% 
-%       24  25 (26)  --> 5^2 + 1
-%       9  (10) 27   --> 3^2 + 1
-%      (2)  11  26   --> 1^2 + 1
 
-even_N_sum_upper_right_diagonal( N )
-->
-    even_N_sum_upper_right_diagonal( N-1, 1, 0 )
-.
-even_N_sum_upper_right_diagonal( N_minus_1, 
-                                Current, 
-                                Sum ) when Current == N_minus_1
-->
-    Sum + Current*Current + 1
+sum_diagonals_of_spiral( 1 ) -> 1;
+sum_diagonals_of_spiral( 2 ) -> 10;
+sum_diagonals_of_spiral( N ) when N rem 2 == 0
+-> 
+    % N is even
+    sum_diagonals_of_spiral( N, 2, 0 )
 ;
-even_N_sum_upper_right_diagonal( N_minus_1, 
-                                Current, 
-                                Sum )
-->
-    even_N_sum_upper_right_diagonal( N_minus_1, 
-                                    Current + 2, 
-                                    Sum + Current*Current + 1 )
+sum_diagonals_of_spiral( N ) 
+-> 
+    % N is odd -- start at K=3 and initialize sum to 1! See comment at end. 
+    sum_diagonals_of_spiral( N, 3, 1 )
 .
-
-% In an even-square (i.e. a square whose side N is an even number), the upper 
-% left diagonal consists of (odd N^2 - (N-1)) up to N-1.
-%
-% e.g. N = 6:
-%
-%        (21) 22  23  --> 5^2 - 4
-%         20 (7)  8   --> 3^2 - 2
-%         19  6  (1)  --> 1^2 - 0
-
-
-even_N_sum_upper_left_diagonal( N )
+sum_diagonals_of_spiral( N, Current, Sum) when Current > N
 ->
-    even_N_sum_upper_left_diagonal( N-1, 1, 0 )
-.
-even_N_sum_upper_left_diagonal( N_minus_1, 
-                               Current, 
-                               Sum ) when Current == N_minus_1
-->
-    Sum + (Current*Current - (Current-1))
+    Sum
 ;
-even_N_sum_upper_left_diagonal( N_minus_1, 
-                               Current, 
-                               Sum )
+sum_diagonals_of_spiral( N , Current, Sum )
 ->
-    even_N_sum_upper_left_diagonal( N_minus_1, 
-                                   Current + 2, 
-                                   Sum + (Current*Current - (Current-1)) )
+    % See comment at end for derivation of this formula. 
+    sum_diagonals_of_spiral( N, 
+                             Current + 2,
+                             Sum + 4*Current*Current - 6*Current + 6 )
 .
 
-
-% In an even-square (i.e. a square whose side N is an even number), the lower
-% left diagonal consists of even N^2 up to N
-%
-% e.g. N = 6:
+% There are 4 corners of each spiral. Each corner can be computed from the 
+% size of the spiral. For an K-sided spiral, the four corners can be described 
+% as
 % 
-%       18  5  (4)  --> 2^2
-%       17 (16) 15  --> 4^2
-%      (36) 35  34  --> 6^2
-even_N_sum_lower_left_diagonal( N )
-->
-    even_N_sum_lower_left_diagonal( N, 2, 0 )
-.
-even_N_sum_lower_left_diagonal( N,
-                               Current,
-                               Sum ) when Current == N
-->
-    Sum + Current*Current
-;
-even_N_sum_lower_left_diagonal( N,
-                               Current,
-                               Sum ) 
-->
-    even_N_sum_lower_left_diagonal( N,
-                                    Current + 2,
-                                    Sum + Current*Current)
-.
-
-
-% In an even-square (i.e. a square whose side N is an even number), the lower
-% right diagonal consists of even (N^2 - (N-1)) up to N
-%
-% e.g. N = 6:
+%   K^2
+%   K^2 - (K-1)
+%   (K-1)^2 + 1
+%   (K-1)^2 - ((K-1) - 1) 
 % 
+% Simplifying this yields
 % 
-%       (3)  12  29  --> 2^2 - 1
-%        14 (13) 30  --> 4^2 - 3
-%        33  32 (31) --> 6^2 - 5
-even_N_sum_lower_right_diagonal( N )
-->
-    even_N_sum_lower_right_diagonal( N, 2, 0 )
-.
-even_N_sum_lower_right_diagonal( N,
-                                Current,
-                                Sum ) when Current == N
-->
-    Sum + Current*Current - (Current-1)
-;
-even_N_sum_lower_right_diagonal( N,
-                                Current,
-                                Sum )
-->
-    even_N_sum_lower_right_diagonal( N,
-                                    Current + 2,
-                                    Sum + Current*Current - (Current-1) )
-.
-
-
-% ------------------
-% N is an odd Number
-% ------------------
-% In an odd-square (i.e. a square whose side N is an odd number), the upper 
-% right diagonal (excluding the middle 1) consists of odd squares up to N.
-%
-% e.g. N = 7:
+%  4K^2 - 6K + 6
 % 
-%       46  47  48 (49) --> 7^2    
-%       23  24 (25) 26  --> 5^2
-%       8  (9)  10  27  --> 3^2
-%       1   2   11  26
-%       ^
-%       |
-%    excluded (summed in right at the end)
-
-odd_N_sum_upper_right_diagonal( N )
-->
-    odd_N_sum_upper_right_diagonal( N, 3, 0 )
-.
-odd_N_sum_upper_right_diagonal( N, 
-                                Current, 
-                                Sum ) when Current == N
-->
-    Sum + Current*Current
-;
-odd_N_sum_upper_right_diagonal( N, 
-                                Current, 
-                                Sum )
-->
-    odd_N_sum_upper_right_diagonal( N, 
-                                    Current + 2, 
-                                    Sum + Current*Current )
-.
-
-% In an odd-square (i.e. a square whose side N is an odd number), the upper 
-% left diagonal (excluding the middle 1) consists of (odd squares - 1 less 
-% than the odd number) up to N^2.
+% Thus, beginning at 1, we simply grow the spiral side by 2 each step until we 
+% hit N, and at each stage K we sum the corners. This will automatically sum 
+% the diagonals by the time we've grown the spiral to N. 
 %
-% e.g. N = 7:
-%
-%       (43) 44  45  46  --> 7^2 - 6
-%        42 (21) 22  23  --> 5^2 - 4
-%        41  20 (7)  8   --> 3^2 - 2
-%        40  19  6   1   
-%                    ^
-%                    |
-%          excluded (summed in right at the end)
-
-odd_N_sum_upper_left_diagonal( N )
-->
-    odd_N_sum_upper_left_diagonal( N, 3, 0 )
-.
-odd_N_sum_upper_left_diagonal( N, 
-                               Current, 
-                               Sum ) when Current == N
-->
-    Sum + (Current*Current - (Current-1))
-;
-odd_N_sum_upper_left_diagonal( N, 
-                               Current, 
-                               Sum )
-->
-    odd_N_sum_upper_left_diagonal( N, 
-                                   Current + 2, 
-                                   Sum + (Current*Current - (Current-1)) )
-.
-
-
-% In an odd-square (i.e. a square whose side N is an odd number), the lower
-% left diagonal (excluding the middle 1) consists of (even squares + 1) up to 
-% N-1
-%
-% e.g. N = 7:
-% 
-%           excluded (summed in right at the end)
-%                   |
-%                   v
-%       40  19  6   1
-%       39  18 (5)  4   --> 2^2 + 1
-%       38 (17) 16  15  --> 4^2 + 1
-%      (37) 36  35  34  --> 6^2 + 1
-odd_N_sum_lower_left_diagonal( N )
-->
-    odd_N_sum_lower_left_diagonal( N-1, 2, 0 )
-.
-odd_N_sum_lower_left_diagonal( N_minus_1,
-                               Current,
-                               Sum ) when Current == N_minus_1
-->
-    Sum + Current*Current + 1
-;
-odd_N_sum_lower_left_diagonal( N_minus_1,
-                               Current,
-                               Sum ) 
-->
-    odd_N_sum_lower_left_diagonal( N_minus_1, 
-                                    Current + 2,
-                                    Sum + Current*Current + 1)
-.
-
-
-% In an odd-square (i.e. a square whose side N is an odd number), the lower
-% right diagonal (excluding the middle 1) consists of (even squares - (N-1)) 
-% up to N-1
-%
-% e.g. N = 7:
-% 
-% 
-% excluded (summed in right at the end)
-%       |
-%       v
-%       1   2   11  28
-%       4  (3)  12  29  --> 2^2 - 1
-%       15  14 (13) 30  --> 4^2 - 3
-%       34  33  32 (31) --> 6^2 - 5
-odd_N_sum_lower_right_diagonal( N )
-->
-    odd_N_sum_lower_right_diagonal( N-1, 2, 0 )
-.
-odd_N_sum_lower_right_diagonal( N_minus_1,
-                                Current,
-                                Sum ) when Current == N_minus_1
-->
-    Sum + Current*Current - (Current-1)
-;
-odd_N_sum_lower_right_diagonal( N_minus_1,
-                                Current,
-                                Sum )
-->
-    odd_N_sum_lower_right_diagonal( N_minus_1,
-                                    Current + 2,
-                                    Sum + Current*Current - (Current-1) )
-.
+% Note that the sum_diagonals formula produces 4 instead of 1 when K = 1, so 
+% we must handle this exceptional case. We also have to check if N is even or 
+% odd. We can handle both these cases by beginning at K=2 for even N and K=3 
+% for odd N (taking care to initialize sum to 1 in the latter case to account 
+% for K=1 case where the sum of the diagonals is 1).
