@@ -11,9 +11,7 @@
 % How many circular primes are there below one million?   
 
 -module( problem35 ).
--export( [ main/1,
-           is_circular_prime/2,
-           build_list_of_primes/1] ).
+-export( [ main/1] ).
 
 main( N )
 ->
