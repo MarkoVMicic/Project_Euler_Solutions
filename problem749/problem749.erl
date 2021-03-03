@@ -14,7 +14,9 @@
 
 -module( problem749 ).
 -export( [ main/1,
-           is_near_power_sum/1 ] ).
+           is_near_power_sum/1,
+           find_starting_k/1,
+           sum_digits/1 ] ).
 
 % Note: Number_Digits needs to be >= 2
 main( Number_Digits )
@@ -36,7 +38,7 @@ s( Current_Value, Max_Value, Acc ) when Current_Value >= Max_Value
 ;
 s( Current_Value, Max_Value, Acc ) when Current_Value rem 100000 == 0
 ->
-    io:fwrite("~p/~p~n", [Current_Value, Max_Value]),
+    io:fwrite("~p/~p~n",    [Current_Value, Max_Value]),
     case is_near_power_sum( Current_Value ) of
         true
         ->
@@ -63,7 +65,8 @@ s( Current_Value, Max_Value, Acc )
 
 is_near_power_sum( Number )
 ->
-    is_near_power_sum( Number, 1, 0 )
+    K = find_starting_k( Number ),
+    is_near_power_sum( Number, K, 0 )
 .
 is_near_power_sum( Number, K, Previous )
 ->
@@ -95,6 +98,41 @@ is_near_power_sum( Number, K, Previous )
                     is_near_power_sum( Number, K+1, Power_Sum )
             end
     end 
+.
+
+
+find_starting_k( Number )
+->
+    Sum_Of_Digits = sum_digits( Number ),
+    find_starting_k( Number, Sum_Of_Digits, 1, 0 )
+.
+find_starting_k( Number, Sum_Of_Digits, K, Previous )
+->
+    Kth_Power_Sum_Digits = exp( Sum_Of_Digits, K ),
+    case Kth_Power_Sum_Digits > Number orelse
+         Kth_Power_Sum_Digits =< Previous     of
+        true
+        ->
+            % Found the starting K on the previous iteration
+            K - 1
+        ;
+        false
+        ->
+            find_starting_k( Number, Sum_Of_Digits, K + 1, Kth_Power_Sum_Digits )
+    end
+.
+
+sum_digits( Number )
+->
+    sum_digits( integer_to_list(Number), 0 )
+.
+sum_digits( [Current_Digit | Rest], Acc )
+->
+    sum_digits( Rest, list_to_integer([Current_Digit]) + Acc )
+;
+sum_digits( [], Acc )
+->
+    Acc
 .
 
 
